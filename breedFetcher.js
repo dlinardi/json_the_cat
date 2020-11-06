@@ -1,15 +1,22 @@
 const request = require('request');
 
-const breed = process.argv.slice(2,3);
+const fetchBreedDescription = (breedName, callback) => {
+  request(`https://api.thecatapi.com/v1/breeds/search?q=${breedName}`, (error, response, body) => {
 
-request(`https://api.thecatapi.com/v1/breeds/search?q=${breed}`, (error, response, body) => {
-  if (body !== '[]' && error === null && response.statusCode === 200) {
-    const data = JSON.parse(body);
-    console.log(data[0].description);
-  } else if (body === '[]') {
-    console.log('Error:', `${breed} is an invalid breed name.`);
-  } else {
-    console.log('Error: Something went wrong.', response.statusCode, response.statusMessage);
-  }
-  
-});
+    if (error) {
+      callback(error, null);
+    } else {
+      const data = JSON.parse(body);
+
+      if (data.length === 0) {
+        callback(`${breedName} is an invalid breed name.`, null);
+      } else {
+        callback(null, data[0].description);
+      }
+
+    }
+
+  });
+};
+
+module.exports = { fetchBreedDescription };
